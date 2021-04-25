@@ -226,8 +226,8 @@ public  struct JsonTokenizer {
     }
     
     func isEscape(c: Character) -> Bool {
-        // \" \\ \u \r \n \b \t \f
-        return ["\"", "\\", "u", "r", "n", "b", "t", "f"].contains(c)
+        // \" \\ \v \r \n \b \t \f
+        return ["\"", "\\", "v", "r", "n", "b", "t", "f"].contains(c) //Sven
     }
     
     /// 判断是否是数字字符
