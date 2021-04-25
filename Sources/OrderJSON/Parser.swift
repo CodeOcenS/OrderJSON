@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct JsonParserError: Error {
-    var msg: String
-    init(msg: String) {
+public struct JsonParserError: Error {
+   public var msg: String
+    public init(msg: String) {
         self.msg = msg
     }
 }
@@ -20,7 +20,7 @@ struct JsonParserError: Error {
 // 1. 词法分析：按照构词规则将 JSON 字符串解析成 Token 流
 // 2. 语法分析：根据 JSON 文法检查上面 Token 序列所构词的 JSON 结构是否合法
 
-enum JsonToken: Equatable {
+public enum JsonToken: Equatable {
     case objBegin // {
     case objEnd   // }
     case arrBegin // [
@@ -32,7 +32,7 @@ enum JsonToken: Equatable {
     case sepColon // :
     case sepComma // ,
     
-    static func == (lhs: JsonToken, rhs: JsonToken) -> Bool {
+    public static func == (lhs: JsonToken, rhs: JsonToken) -> Bool {
         switch (lhs, rhs) {
         case let (.string(l), .string(r)): return l == r
         case let (.number(l), .number(r)): return l == r
@@ -51,13 +51,13 @@ enum JsonToken: Equatable {
 }
 
 /// 分词
-struct JsonTokenizer {
+public  struct JsonTokenizer {
     
     private var input: String
     
     private var currentIndex: String.Index
     
-    init(string: String) {
+    public  init(string: String) {
         self.input = string
         self.currentIndex = string.startIndex
     }
@@ -252,7 +252,7 @@ struct JsonTokenizer {
 }
 
 // 语法解析
-struct JsonParser {
+public struct JsonParser {
     private var tokenizer: JsonTokenizer
     
     private init(text: String) {

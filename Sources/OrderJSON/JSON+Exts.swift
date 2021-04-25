@@ -7,8 +7,8 @@
 
 import Foundation
 
-extension JSON {
-    // 返回 Any 基础类型类型
+public extension JSON {
+    /// 返回 Any 基础类型类型
     func any() -> Any {
         switch self {
         case .string(let value):
