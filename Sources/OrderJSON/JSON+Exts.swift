@@ -14,13 +14,7 @@ public extension JSON {
         case .string(let value):
             return value
         case .object(let value):
-            var dic: [String: Any] = [:]
-            value.forEach { (temp) in
-                let key = temp.key
-                let value = temp.value.any()
-                dic[key] = value
-            }
-            return dic
+            return value.map { $1.any() }  // 数组形式
         case .array(let value):
             return value.map{ $0.any() }
         case .double(let value):
