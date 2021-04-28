@@ -17,8 +17,8 @@ public struct JsonParserError: Error {
 /// 分词 + AST
 // [自己动手实现一个简单的JSON解析器](https://segmentfault.com/a/1190000010998941)
 
-// 1. 词法分析：按照构词规则将 JSON 字符串解析成 Token 流
-// 2. 语法分析：根据 JSON 文法检查上面 Token 序列所构词的 JSON 结构是否合法
+// 1. 词法分析：按照构词规则将 OrderJSON 字符串解析成 Token 流
+// 2. 语法分析：根据 OrderJSON 文法检查上面 Token 序列所构词的 OrderJSON 结构是否合法
 
 public enum JsonToken: Equatable {
     case objBegin // {
@@ -166,7 +166,7 @@ public  struct JsonTokenizer {
                 }
             case "\"": //  碰到另一个引号，则认为字符串解析结束
                 return String(ret)
-            case "\r", "\n": // 传入JSON 字符串不允许换行
+            case "\r", "\n": // 传入OrderJSON 字符串不允许换行
                 throw JsonParserError(msg: "无效的字符\(ch)")
             default:
                 ret.append(ch)
@@ -259,24 +259,24 @@ public struct JsonParser {
         tokenizer = JsonTokenizer(string: text)
     }
     
-    static func parse(text: String) throws -> JSON? {
+    static func parse(text: String) throws -> OrderJSON? {
         var parser = JsonParser(text: text)
         return try parser.parse()
     }
     
     
-    private mutating func parseElement() throws -> JSON? {
+    private mutating func parseElement() throws -> OrderJSON? {
         guard let nextToken = try tokenizer.nextToken() else {
             return nil
         }
         
         switch nextToken {
         case .arrBegin:
-            return try JSON(parserArr())
+            return try OrderJSON(parserArr())
         case .arrEnd:  // Sven: 解决空数组问题
             return nil
         case .objBegin:
-            return try JSON(parserObj())
+            return try OrderJSON(parserObj())
         case .bool(let b):
             return .bool(b == "true")
         case .null:
@@ -296,8 +296,8 @@ public struct JsonParser {
         }
     }
     
-    private mutating func parserArr() throws -> [JSON] {
-        var arr: [JSON] = []
+    private mutating func parserArr() throws -> [OrderJSON] {
+        var arr: [OrderJSON] = []
         repeat {
             guard let ele = try parseElement() else {
                 //throw ParserError(msg: "parserArr 解析失败")
@@ -323,8 +323,8 @@ public struct JsonParser {
         return arr
     }
     
-    private mutating func parserObj() throws -> [String: JSON] {
-        var obj: [String: JSON] = [:]
+    private mutating func parserObj() throws -> [[String: OrderJSON]] {
+        var obj: [[String: OrderJSON]] = []
 
         repeat {
             
@@ -337,8 +337,11 @@ public struct JsonParser {
             guard case let .string(key) = next else {
                 throw ParserError(msg: "parserObj 错误, key 不存在")
             }
-            
-            if obj.keys.contains(key) {
+            var allKeys: Set<String> = []
+            obj.forEach { (value) in
+                allKeys.insert(value.keys.first!)
+            }
+            if allKeys.contains(key) {
                 throw ParserError(msg: "parserObj 错误, 已经存在key: \(key)")
             }
             
@@ -349,8 +352,8 @@ public struct JsonParser {
             guard let value = try parseElement() else {
                 throw ParserError(msg: "parserObj 错误，值不存在")
             }
-            
-            obj[key] = value
+            let newObj = [key: value]
+            obj.append(newObj)
             
             guard let nex = try tokenizer.nextToken() else {
                 throw ParserError(msg: "parserObj 错误， 下一个值不存在")
@@ -368,15 +371,15 @@ public struct JsonParser {
         return obj
     }
     
-    private mutating func parse() throws  -> JSON? {
+    private mutating func parse() throws  -> OrderJSON? {
         guard let token = try tokenizer.nextToken() else {
             return nil
         }
         switch token {
         case .arrBegin:
-            return try JSON(parserArr())
+            return try OrderJSON(parserArr())
         case .objBegin:
-            return try JSON(parserObj())
+            return try OrderJSON(parserObj())
         default:
             return nil
         }
