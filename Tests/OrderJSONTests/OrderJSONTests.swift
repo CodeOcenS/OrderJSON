@@ -64,32 +64,63 @@ final class OrderJSONTests: XCTestCase {
         let jsonObj = try? JsonParser.parse(text: json)
         XCTAssertNotNil(jsonObj)
     }
+    
+    /// 包含转义字符
+    //func testContactEscapeJson() {
+//        let escapeJson = """
+//        """
+//        let unicodeJson = """
+//        {"unicode":"\u4e2d\u6587"}
+//        """
+//        let jsonObj = try? JsonParser.parse(text: unicodeJson)
+//        XCTAssertNotNil(jsonObj)
+    //}
     // MARK： - 解析转化为 字典
-    let yapiJSON =
+    
+    private func transformOrderJSON() -> OrderJSON? {
+        let json =
+            """
+        {"stringValue":"字符串","intValue":20,"doubleValue":12.8,"boolValue":false,"objectValue":{"objectKey1":"value1","objectKey2":2,"objectKey3":{"key":"value"}},"arrayValue1":[1,2,3],"arrayValue2":[{"name":"小明","age":18}],"emptyArray":[],"emptyObject":{},"nullValue":null}
         """
-    {"type":"object","title":"empty object","properties":{"data":{"type":"object","properties":{"stringValue":{"type":"string","description":"字符串类型","mock":{"mock":"字符串"}},"integerValue":{"type":"integer","description":"整型数据类型","mock":{"mock":"20"}},"numberValue":{"type":"number","description":"浮点数据类型","mock":{"mock":"15.5"}},"booleanValue":{"type":"boolean","description":"布尔类型","mock":{"mock":"true"}},"arrayValue":{"type":"array","items":{"type":"string","mock":{"mock":"数组字符串"}},"description":"数组类型"}},"required":["stringValue","integerValue","numberValue","booleanValue","arrayValue"]},"code":{"type":"string","mock":{"mock":"200"}}},"required":["data","code"]}
-    """
-    private func transformYapiData() -> OrderJSON? {
-        try? JsonParser.parse(text: yapiJSON)
+        return try? JsonParser.parse(text: json)
     }
     func testTransformYapiDataToJSON() {
-        let jsonObj = transformYapiData()
+        let jsonObj = transformOrderJSON()
         XCTAssertNotNil(jsonObj)
         
     }
     
-//    func testJSONAnyVale() {
-//        guard let jsonObj = transformYapiData() else {
-//            return
-//        }
-//        let anyValue = jsonObj.any()
-//        guard let dic = anyValue as? [String: Any] else {
-//            XCTAssertTrue(true, "通过YApij son字符串创建的JSON对象， 扩展 any() 方法返回值转字必须成功")
-//            return
-//        }
-//
-//        XCTAssertTrue(dic["type"] as! String == "object")
-//        XCTAssertTrue(dic["required"] as! [String] == ["data","code"])
-//    }
-
+    private func transformStringToArray(_ string: String) -> [String] {
+        if string.isEmpty {
+            return []
+        }
+        return string.components(separatedBy: ".")
+    }
+    
+    /// 测试某路径下的 key 顺序
+    func testJSONKeys() {
+        guard let jsonObject = transformOrderJSON() else {
+            XCTAssertFalse(false)
+            return
+        }
+        let objectValuePath = "objectValue"
+        let rootPath = ""
+        let rootKeys = jsonObject.subKeysFor(keyPath: transformStringToArray(rootPath))
+        XCTAssertTrue(rootKeys == ["stringValue","intValue","doubleValue","boolValue","objectValue","arrayValue1","arrayValue2","emptyArray","emptyObject","nullValue",])
+        let dataKeysWhenRight = ["objectKey1", "objectKey2","objectKey3"]
+        let dataKeys = jsonObject.subKeysFor(keyPath: transformStringToArray(objectValuePath))
+        XCTAssertTrue(dataKeys == dataKeysWhenRight)
+        
+        let stringValuePath = "stringValue"
+        let stringValueKeys = jsonObject.subKeysFor(keyPath: transformStringToArray(stringValuePath))
+        XCTAssertTrue(stringValueKeys.isEmpty)
+        
+        let objectArrayValuePath = "arrayValue2"
+        let objectValuePathKeys = jsonObject.subKeysFor(keyPath: transformStringToArray(objectArrayValuePath))
+        XCTAssertTrue(objectValuePathKeys == ["name","age"])
+        
+        let multiPath = "objectValue.objectKey3"
+        let multiPathPathKeys = jsonObject.subKeysFor(keyPath: transformStringToArray(multiPath))
+        XCTAssertTrue(multiPathPathKeys == ["key"])
+    }
 }

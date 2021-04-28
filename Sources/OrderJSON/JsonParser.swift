@@ -256,7 +256,11 @@ public struct JsonParser {
     private var tokenizer: JsonTokenizer
     
     private init(text: String) {
-        tokenizer = JsonTokenizer(string: text)
+        var availableText = text
+        if text.contains("\n") {
+            availableText = text.replacingOccurrences(of: "\n", with: "") //去除\n [不严谨]
+        }
+        tokenizer = JsonTokenizer(string: availableText)
     }
     
     static func parse(text: String) throws -> OrderJSON? {
