@@ -263,7 +263,7 @@ public struct JsonParser {
         tokenizer = JsonTokenizer(string: availableText)
     }
     
-    static func parse(text: String) throws -> OrderJSON? {
+    public static func parse(text: String) throws -> OrderJSON? {
         var parser = JsonParser(text: text)
         return try parser.parse()
     }
