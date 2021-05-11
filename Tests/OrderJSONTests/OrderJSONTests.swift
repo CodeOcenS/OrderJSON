@@ -1,5 +1,6 @@
 import XCTest
 @testable import OrderJSON
+@testable import OrderedCollections
 
 final class OrderJSONTests: XCTestCase {
     func testExample() {
@@ -37,6 +38,13 @@ final class OrderJSONTests: XCTestCase {
         let json = "{\"temp\":true,\"say\":\"hello\",\"name\":\"world\"}"
         let jsonObj = try? JsonParser.parse(text: json)
         XCTAssertNotNil(jsonObj)
+        
+        let anyValue = jsonObj?.any()
+        XCTAssertNotNil(anyValue)
+        if let value = anyValue as? OrderedDictionary<String, Any> {
+            let keys: OrderedSet<String> = ["temp", "say","name"]
+            XCTAssertTrue(keys == value.keys)
+        }
     }
     
     /// 多层 json 解析
@@ -66,7 +74,7 @@ final class OrderJSONTests: XCTestCase {
     }
     
     /// 包含转义字符
-    //func testContactEscapeJson() {
+//    func testContactEscapeJson() {
 //        let escapeJson = """
 //        """
 //        let unicodeJson = """
@@ -74,7 +82,7 @@ final class OrderJSONTests: XCTestCase {
 //        """
 //        let jsonObj = try? JsonParser.parse(text: unicodeJson)
 //        XCTAssertNotNil(jsonObj)
-    //}
+//    }
     // MARK： - 解析转化为 字典
     
     private func transformOrderJSON() -> OrderJSON? {
@@ -122,5 +130,10 @@ final class OrderJSONTests: XCTestCase {
         let multiPath = "objectValue.objectKey3"
         let multiPathPathKeys = jsonObject.subKeysFor(keyPath: transformStringToArray(multiPath))
         XCTAssertTrue(multiPathPathKeys == ["key"])
+    }
+    
+    // MARK: - OrderedDictionary
+    func testOrderedDictionary() {
+        
     }
 }

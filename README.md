@@ -3,14 +3,22 @@
 ## 简介
 OrderJSON 是手动解析 json 字符串， 使得字典 key 与 json key顺序一致。
 
+**主要功能**
+
+* 手动解析 json 字符串
+* 返回有序字典`OrderedDictionary`
 
 **背景**
 在使用系统自带的 json 字符串转字典方法`JSONSerialization`后，发现字典是无序的。但是有时候我又想知道 key 的顺序。
 所以在 [json -- swiftDo](https://github.com/swiftdo/json)基础上，使得我们可以获取 json 的 key 顺序。
 
+> Tip: 苹果官方提供有序字典、有序集合[开源项目](https://github.com/apple/swift-collections)，当我们关注顺序的时候可以引入使用
+
 ## 使用
 
-json 字符串
+比如这里我们想要获取某个路径下的 key 顺序
+
+目标 json 字符串
 ``` javascript
 {
     "stringValue": "字符串",
@@ -35,7 +43,7 @@ json 字符串
     "nullValue": null
 }
 ```
-### 装换为 OrderJSON 
+### 转换为 OrderJSON 
 
 ```swift
 let json =
@@ -78,12 +86,28 @@ let rootKeys = jsonObject.subKeysFor(keyPath: transformStringToArray(rootPath))
 
 多层 key 使用`.`连接
 比如`objectKey3`的子 key 顺序 ==》 path = "objectValue.objectKey3"
+
 ```swift
 let multiPath = "objectValue.objectKey3"
 let multiPathPathKeys = jsonObject.subKeysFor(keyPath: transformStringToArray(multiPath)) // ["key1","key2"]
 ```
 
+## 获取 OrderJSON 的有序字典方法
+
+```swift
+    /// 获取 有序字典
+    /// - Returns: 返回有序字典，如果 json 为数组则返回 nil
+    public func orderedDictionary() -> OrderedDictionary<String, Any>?
+
+    /// 获取 Any 类型， 其中 object 类型返回 `OrderedDictionary`
+    /// - Returns: 返回 Any 类型。
+    public func any() -> Any
+```
+
+
+
 参考文章
+
 - [Swift 码了个 JSON 解析器(一)](https://oldbird.run/swift/fp/t3-json1.html)
 - [Swift 码了个 JSON 解析器(二)](https://oldbird.run/swift/fp/t3-json2.html)
 - [Swift 码了个 JSON 解析器(三)](https://oldbird.run/swift/fp/t3-json3.html)
